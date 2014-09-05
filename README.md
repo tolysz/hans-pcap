@@ -24,3 +24,4 @@ example use:
 
 
 And we can continue using HaNS as normal.
+See example/gal.hs for a working example.
