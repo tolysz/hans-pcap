@@ -15,7 +15,7 @@ maintainer:          tolysz@gmail.com
 -- copyright:           
 category:            Network
 build-type:          Simple
-extra-source-files:  tests/test.hs
+extra-source-files:  tests/test.hs, tests/gal.hs
                      CHANGES
 Stability:           experimental
 Source-Repository head

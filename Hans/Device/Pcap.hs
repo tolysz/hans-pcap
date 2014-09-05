@@ -1,4 +1,5 @@
 {-# LANGUAGE ViewPatterns
+           , BangPatterns
            , RecordWildCards #-}
 
 module Hans.Device.Pcap where
@@ -6,7 +7,7 @@ module Hans.Device.Pcap where
 import Hans.Layer.Ethernet
 import Hans.Address.Mac
 
-import Control.Monad (forever)
+import Control.Monad (forever, void)
 import qualified Data.ByteString          as S
 import qualified Data.ByteString.Internal as S
 import qualified Data.ByteString.Lazy     as L
@@ -23,7 +24,6 @@ devs = "/sys/class/net"
 tryRead :: String  -> IO (Maybe String)
 tryRead f = either ((const Nothing) :: SomeException -> Maybe String ) Just <$> try ( head . lines <$> Strict.readFile f)
 
-
 -- | Structure to keep gathered info from the filesystem
 data NetDev = NetDev
   { ndName    :: String
@@ -32,7 +32,7 @@ data NetDev = NetDev
   , ndCarrier :: Maybe String
   , ndDormant   :: Maybe String
   , ndFlags     :: Maybe String
-
+  , ndLinks     :: [Link]
   } deriving Show
 
 isValidND (ndMAC -> Nothing) = False
@@ -49,29 +49,24 @@ populateDev s = do
           <*> b "carrier"
           <*> b "dormant"
           <*> b "flags"
+          <*> pure []
 
 -- | Open device with pcap, will give info about the state,
--- | Unless the device is up it will throw errors later
-openPcap :: String -> IO (Maybe (PcapHandle, NetDev))
-openPcap s = do
-       dev <- openLive s 65535 True 0
-       setNonBlock dev True
+--   Unless the device is up it will throw errors later
+--   Be sure to use fesh mac, otherwise all might fail.
+openPcap :: String -> Maybe Mac -> IO (Maybe (PcapHandle, NetDev))
+openPcap s mm = do
+       dev <- openLive s 1514 True 0
+--       setNonBlock dev True
+       dl <- listDatalinks dev
        a@(NetDev{..}) <- populateDev s
-       return $ case  ndMAC of
+       return $ case  (mm <|> ndMAC) of
           Nothing -> Nothing
-          Just m -> Just (dev, a)
+          Just m -> Just (dev, a{ndLinks=dl, ndMAC=Just m})
 
+-- | send to deviece 
 pcapSend :: PcapHandle -> L.ByteString -> IO ()
-pcapSend dev bd = sendPacketBS dev (L.toStrict bd)
+pcapSend dev !bd = sendPacketBS dev (L.toStrict bd)
 
-pcapReceiveLoop :: PcapHandle -> EthernetHandle -> IO ()
-pcapReceiveLoop fd eh = forever (k =<< pcapReceive fd)
-  where k pkt = queueEthernet eh pkt
-
--- | Recieve an ethernet frame from a pcap device.
-pcapReceive :: PcapHandle -> IO S.ByteString
-pcapReceive fd = do
-  (PktHdr{..}, packet) <- toBS =<< next fd
-  if S.length packet <= 14
-   then (threadDelay 10000) >> pcapReceive fd
-   else return $ S.take 1514 packet
+-- | receive from it
+pcapReceiveLoop fd eh = void $ loopBS fd (-1) $ \_ packet -> queueEthernet eh packet
