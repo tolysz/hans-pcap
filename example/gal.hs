@@ -124,9 +124,7 @@ initEthernetDevice ns = do
 dname = "eth0"
 initEthernetDevice :: NetworkStack -> IO Mac
 initEthernetDevice ns = do
-     Just (dev,nd) <- openPcap dname $ Just (Mac 0x12 0x34 0x56 0x78 0x9A 0xBC)
-     print nd
-     let Just mac = (ndMAC nd)
+     let mac = Mac 0x12 0x34 0x56 0x78 0x9A 0xBC
      addDevice ns mac (pcapSend dev) (pcapReceiveLoop dev)
      return mac
 #endif

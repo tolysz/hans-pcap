@@ -10,15 +10,16 @@ Top run requires: root - all because we need to use PCAP
 example use:
 
     import Hans.NetworkStack
-    import qualified Hans.Layer.Ethernet as Eth
     import Hans.Device.Pcap
 
     main :: IO ()
     main = do
       ns  <- newNetworkStack
-      Just (dev,nd) <- openPcap "eth0" $ Just $ Mac 1 2 3 4 5 6
-      print nd
-      let Just mac = (ndMAC nd)
+      -- MAC we want to have; make it unique
+      let mac = Mac 1 2 3 4 5 6
+
+      -- device we attach to
+      dev <- openPcap "eth0" 
       addDevice ns mac (pcapSend dev) (pcapReceiveLoop dev)
       deviceUp ns mac
 
