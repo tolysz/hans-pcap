@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 
 module Hans.Device.Pcap (pcapOpen, pcapSend, pcapReceiveLoop) where
 
