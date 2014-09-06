@@ -1,21 +1,23 @@
 {-# LANGUAGE BangPatterns #-}
 
-module Hans.Device.Pcap where
+module Hans.Device.Pcap (pcapOpen, pcapSend, pcapReceiveLoop) where
 
-import Hans.Layer.Ethernet
-import Control.Monad (void)
-import qualified Data.ByteString.Lazy     as L
-import Network.Pcap
+import Prelude              (String, IO, Bool(..), const, (.))
+import Hans.Layer.Ethernet  (EthernetHandle, queueEthernet)
+import Control.Monad        (void)
+import Data.ByteString.Lazy (ByteString, toStrict)
+import Network.Pcap         (PcapHandle, openLive, loopBS, sendPacketBS)
 
 -- | Open device with pcap, will give info about the state,
 --   Unless the device is up it will throw errors later
 --   Be sure to use fesh mac, otherwise all might fail.
-openPcap :: String -> IO PcapHandle
-openPcap s = openLive s 1514 True 0
+pcapOpen :: String -> IO PcapHandle
+pcapOpen s = openLive s 1514 True 0
 
 -- | send to deviece 
-pcapSend :: PcapHandle -> L.ByteString -> IO ()
-pcapSend dev !bd = sendPacketBS dev (L.toStrict bd)
+pcapSend :: PcapHandle -> ByteString -> IO ()
+pcapSend dev = sendPacketBS dev . toStrict
 
 -- | receive from it
-pcapReceiveLoop fd eh = void $ loopBS fd (-1) $ \_ packet -> queueEthernet eh packet
+pcapReceiveLoop :: PcapHandle -> EthernetHandle -> IO ()
+pcapReceiveLoop dev = void . loopBS dev (-1) . const . queueEthernet

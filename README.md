@@ -19,7 +19,7 @@ example use:
       let mac = Mac 1 2 3 4 5 6
 
       -- device we attach to
-      dev <- openPcap "eth0" 
+      dev <- pcapOpen "eth0" 
       addDevice ns mac (pcapSend dev) (pcapReceiveLoop dev)
       deviceUp ns mac
 
