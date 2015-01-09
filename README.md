@@ -1,3 +1,5 @@
+# hans-pcap [![Build Status](https://travis-ci.org/tolysz/hans-pcap.svg?branch=master)](https://travis-ci.org/tolysz/hans-pcap) [![Latest Version](https://img.shields.io/hackage/v/hans-pcap.svg)](https://hackage.haskell.org/package/hans-pcap)
+
 hans-pcap
 ========
 
