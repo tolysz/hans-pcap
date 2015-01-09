@@ -12,7 +12,7 @@ license:             BSD3
 license-file:        LICENSE
 author:              Marcin Tolysz
 maintainer:          tolysz@gmail.com
--- copyright:           
+copyright:           ©2014-2015 Marcin Tolysz
 category:            Network
 build-type:          Simple
 extra-source-files:  tests/test.hs, tests/gal.hs
