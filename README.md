@@ -27,3 +27,12 @@ example use:
 
 And we can continue using HaNS as normal.
 See example/gal.hs for a working example.
+
+
+Install
+=======
+
+It requires  `libpcap-dev` (as it is required by `pcap`) to run, So on Debian (or simmilar)_
+
+	sudo apt-get install libpcap-dev
+ 
